@@ -1,8 +1,8 @@
 const cv = require('opencv4nodejs');
 const fileExtension = require('file-extension');
 const shortid = require('shortid');
-fs = require('fs');
-
+const path = require('path');
+const fs = require('fs');
 
 function detectFaces(imageName, callback){
 
@@ -45,13 +45,13 @@ function detectFaces(imageName, callback){
 
     var generatedFileName = shortid.generate();
     // filename generated with path for saving
-    var fileName =__dirname+"/public/processed_images/"+generatedFileName+"."+extension;
+    var fileName = path.join(__dirname, "public", "processed_images", generatedFileName+"."+extension);
 
       cv.imwrite(fileName, image);
       fs.unlink(imageName, function (err) {
         if (err) throw err;
           callback(undefined, {"facesFound":objects.length ,
-                               "fileUrl":"/processed_images/"+generatedFileName+"."+extension,
+                               "fileUrl": path.join("processed_images", generatedFileName+"."+extension),
                                "fileName": generatedFileName
                              });
       });
