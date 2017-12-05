@@ -8,21 +8,13 @@ const imageDownloader = require('image-downloader');
 const fs = require('fs');
 const findRemoveSync = require('find-remove')
 const path = require('path');
-
-// hourly
-global.tweetCounter = 0;
-var timeInterval = 3600 * 1000;
-var ma = MA(timeInterval);
-
-var trackerTerm = "fashionFace";
-// create a twitter public stream
-var client = new twitter(twitterConfig.config);
-
 // express app
-var app = express();
+const app = express();
+// create a twitter public stream
+const client = new twitter(twitterConfig.config);
 
 // setup server
-var server = app.listen(process.env.PORT || 3000, () => {
+const server = app.listen(process.env.PORT || 3000, () => {
     console.log(`Server is listening on port ${process.env.PORT || 3000}`);
 });
 
@@ -30,7 +22,16 @@ var server = app.listen(process.env.PORT || 3000, () => {
 app.use(express.static('public'));
 
 // Initialize socket.io
-var io = socket.listen(server);
+const io = socket.listen(server);
+
+// tracker term
+var trackerTerm = "fashionFace";
+
+// hourly
+global.tweetCounter = 0;
+let timeInterval = 3600 * 1000;
+const ma = MA(timeInterval);
+
 
 io.on("connection", (socket) => {
     // update tracker
@@ -43,7 +44,7 @@ io.on("connection", (socket) => {
     });
 
     socket.on("deleteProcessedPicture", (data) => {
-        var src = data.src;
+        let src = data.src;
         fs.unlink(path.join(__dirname, "public", src), function(err) {
             if (err) throw err;
             console.log("deleted image" + src);
@@ -63,7 +64,7 @@ client.on('tweet', function(tweet) {
     });
 
     // get media/images array
-    var media = tweet.entities.media;
+    let media = tweet.entities.media;
     // check if it exists and there is something in there
     if (media != undefined && media.length > 0) {
         sendProcessImage(media, tweet);
@@ -88,9 +89,9 @@ function resetTweetParams() {
 
 function sendProcessImage(media, tweet) {
 
-    for (i = 0; i < media.length; i++) {
+    for (let i = 0; i < media.length; i++) {
 
-        var imageOptions = {
+        let imageOptions = {
             url: media[i].media_url_https,
             dest: path.join(__dirname, 'images')
         }
@@ -121,7 +122,7 @@ function sendProcessImage(media, tweet) {
 process.on('SIGINT', function() {
     server.close(() => {
         console.log("cleaning up images...");
-        var result = findRemoveSync(path.join(__dirname, 'images'), { extensions: ['.jpg', '.png', '.jpeg'] });
+        let result = findRemoveSync(path.join(__dirname, 'images'), { extensions: ['.jpg', '.png', '.jpeg'] });
         console.log("cleaning up processed images...");
         result = findRemoveSync(path.join(__dirname, 'public', 'processed_images'), { extensions: ['.jpg', '.png', '.jpeg'] });
         console.log("killing the process...");
