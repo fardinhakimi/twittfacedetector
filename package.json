@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "description": "a marketing campaign impact tracker ",
     "engines": {
-        "node": "v8.9.1"
+        "node": "v8.9.1",
+        "npm": "5.5.1"
     },
     "main": "app.js",
     "scripts": {
