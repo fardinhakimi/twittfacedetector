@@ -1,4 +1,3 @@
-
 const socket = require('socket.io');
 const express = require('express');
 const twitter = require('node-tweet-stream');
@@ -19,12 +18,12 @@ var trackerTerm = "fashionFace";
 // create a twitter public stream
 var client = new twitter(twitterConfig.config);
 
- // express app
+// express app
 var app = express();
 
 // setup server
-var server = app.listen(3000, ()=>{
-  console.log("Server is listening at port 3000 ");
+var server = app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server is listening on port ${process.env.PORT || 3000}`);
 });
 
 // middleware to serve static files (html, css, images, js and ..)
@@ -33,40 +32,40 @@ app.use(express.static('public'));
 // Initialize socket.io
 var io = socket.listen(server);
 
-io.on("connection", (socket)=>{
-  // update tracker
-  socket.on('updateTracker', (data)=>{
-  resetTweetParams();
-  // update track term
-  trackerTerm = data.trackerTerm;
-  // start tracking new track term
-  client.track(trackerTerm);
-  });
-
-  socket.on("deleteProcessedPicture", (data)=>{
-    var src = data.src;
-    fs.unlink(path.join(__dirname,"public", src), function (err){
-      if (err) throw err;
-      console.log("deleted image"+src);
+io.on("connection", (socket) => {
+    // update tracker
+    socket.on('updateTracker', (data) => {
+        resetTweetParams();
+        // update track term
+        trackerTerm = data.trackerTerm;
+        // start tracking new track term
+        client.track(trackerTerm);
     });
 
-  });
+    socket.on("deleteProcessedPicture", (data) => {
+        var src = data.src;
+        fs.unlink(path.join(__dirname, "public", src), function(err) {
+            if (err) throw err;
+            console.log("deleted image" + src);
+        });
+
+    });
 
 });
 
-client.on('tweet', function (tweet){
-  //console.log('tweet received', tweet);
-  global.tweetCounter+=1;
+client.on('tweet', function(tweet) {
+    //console.log('tweet received', tweet);
+    global.tweetCounter += 1;
 
-// calculate moving average
-setInterval(function() {
-  ma.push(Date.now(), tweetCounter);
-});
+    // calculate moving average
+    setInterval(function() {
+        ma.push(Date.now(), tweetCounter);
+    });
 
-// get media/images array
+    // get media/images array
     var media = tweet.entities.media;
-// check if it exists and there is something in there
-    if(media!= undefined && media.length>0){
+    // check if it exists and there is something in there
+    if (media != undefined && media.length > 0) {
         sendProcessImage(media, tweet);
     }
 });
@@ -74,57 +73,58 @@ setInterval(function() {
 
 // track fashion face initially
 client.track(trackerTerm);
- // report error
-client.on('error', function (err) {
+// report error
+client.on('error', function(err) {
     console.log('Something went wrong');
 });
 
 // reset params
-function resetTweetParams(){
-     global.tweetCounter = 0;
-  // untrack previous track term
-   client.untrack(trackerTerm);
+function resetTweetParams() {
+    global.tweetCounter = 0;
+    // untrack previous track term
+    client.untrack(trackerTerm);
 };
 
 
-function sendProcessImage(media, tweet){
-    
-    for(i=0; i<media.length; i++){
-        
-              var imageOptions = {
-                url: media[i].media_url_https,
-                dest: path.join(__dirname , 'images')
-              }
-              
-              imageDownloader.image(imageOptions)
-              .then(({ filename, image }) => {
+function sendProcessImage(media, tweet) {
+
+    for (i = 0; i < media.length; i++) {
+
+        var imageOptions = {
+            url: media[i].media_url_https,
+            dest: path.join(__dirname, 'images')
+        }
+
+        imageDownloader.image(imageOptions)
+            .then(({ filename, image }) => {
                 // detect faces
-                faceDetection.detectFaces(filename, function(err, data){
-                  // tweet the processed image
-                  if(!err){
-                    io.emit('tweet', { "tweet": tweet,
-                                       "fileUrl": data.fileUrl,
-                                       "fileName":data.fileName,
-                                       "trackerTerm":trackerTerm,
-                                       "tweetCounter":global.tweetCounter
-                                       });
-                  }    
+                faceDetection.detectFaces(filename, function(err, data) {
+                    // tweet the processed image
+                    if (!err) {
+                        io.emit('tweet', {
+                            "tweet": tweet,
+                            "fileUrl": data.fileUrl,
+                            "fileName": data.fileName,
+                            "trackerTerm": trackerTerm,
+                            "tweetCounter": global.tweetCounter
+                        });
+                    }
                 });
-                  
-              }).catch((err) => {
+
+            }).catch((err) => {
                 throw err
-              });
-            }
+            });
+    }
 }
 
 // cleanup images and processed images then kill the process
 process.on('SIGINT', function() {
-  server.close(()=> {
-    console.log("cleaning up images...");
-    var result = findRemoveSync(path.join(__dirname, 'images'), {extensions: ['.jpg', '.png','.jpeg']});
-    console.log("cleaning up processed images...");
-        result = findRemoveSync(path.join(__dirname, 'public', 'processed_images'), {extensions: ['.jpg', '.png','.jpeg']});
-    console.log("killing the process...");
-    process.exit();
- });
+    server.close(() => {
+        console.log("cleaning up images...");
+        var result = findRemoveSync(path.join(__dirname, 'images'), { extensions: ['.jpg', '.png', '.jpeg'] });
+        console.log("cleaning up processed images...");
+        result = findRemoveSync(path.join(__dirname, 'public', 'processed_images'), { extensions: ['.jpg', '.png', '.jpeg'] });
+        console.log("killing the process...");
+        process.exit();
+    });
 });
