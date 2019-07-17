@@ -2,16 +2,15 @@ const cv = require('opencv4nodejs')
 const shortid = require('shortid')
 const { extname, join } = require('path')
 const { unlinkSync } = require('fs')
+const config = require('./config.js')
 
 const detectFaces = (imageName) => {
 
     return new Promise((resolve, reject) => {
 
-
         try {
 
             const image = cv.imread(imageName)
-            const extension = fileExtension(imageName)
             const extension = extname(imageName)
             // HAAR trained face detection classifier
             const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2)
@@ -43,7 +42,7 @@ const detectFaces = (imageName) => {
             })
 
             const generatedFileName = shortid.generate()
-            const fileName = join(__dirname, "public", "processed_images", `${generatedFileName}.${extension}`)
+            const fileName = join(config.images_path, `${generatedFileName}.${extension}`)
 
             cv.imwrite(fileName, image)
 

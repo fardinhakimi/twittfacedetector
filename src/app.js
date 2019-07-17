@@ -1,24 +1,24 @@
 const socket = require('socket.io')
 const express = require('express')
 const twitter = require('node-tweet-stream')
-const twitterConfig = require('./config.js')
 const faceDetection = require('./face-detection.js')
 const MA = require('moving-average')
 const imageDownloader = require('image-downloader')
 const { unlink } = require('fs')
 const findRemoveSync = require('find-remove')
 const path = require('path')
-
 require('dotenv').config()
+const config = require('./config.js')
 
 const app = express()
-const client = new twitter(twitterConfig.config)
+const client = new twitter(config.twitterConfig)
 
 const port = process.env.PORT || 3000
 
 const server = app.listen(port, () => {
     console.log(`Server is listening on port ${port}`)
 })
+
 
 app.use(express.static('public'))
 
@@ -57,6 +57,8 @@ io.on("connection", (socket) => {
 
 client.on('tweet', (tweet) => {
 
+    console.log(tweet); exit();
+
     global.tweetCounter += 1
 
     // calculate moving average // TODO
@@ -79,13 +81,13 @@ const resetTweetParams = () => {
 }
 
 
-const sendProcessImage = async (media, tweet) => {
+const sendProcessImage =  async (media, tweet) => {
 
-    media.forEach(image => {
+    media.forEach(async (image) => {
 
         const imageOptions = {
             url: image.media_url_https,
-            dest: path.join(__dirname, 'images')
+            dest: config.images_path
         }
 
         try {
@@ -109,19 +111,6 @@ const sendProcessImage = async (media, tweet) => {
 }
 
 
-process.on('SIGINT', () => {
-
-    server.close(() => {
-        console.log("cleaning up images...")
-        findRemoveSync(path.join(__dirname, 'images'), { extensions: ['.jpg', '.png', '.jpeg'] })
-        console.log("cleaning up processed images...")
-        findRemoveSync(path.join(__dirname, 'public', 'processed_images'), { extensions: ['.jpg', '.png', '.jpeg'] })
-        console.log("killing the process...")
-        process.exit()
-    })
-})
-
-
 // RUN PROGRAM AND LOG ERRORS
 
 client.track(trackerTerm)
@@ -129,3 +118,16 @@ client.track(trackerTerm)
 client.on('error', (err) => {
     console.log(err)
 })
+
+process.on('SIGINT', () => {
+
+    server.close(() => {
+        console.log("cleaning up images...")
+        findRemoveSync(config.images_path, { extensions: ['.jpg', '.png', '.jpeg'] })
+        console.log("cleaning up processed images...")
+        findRemoveSync(config.processed_images_path, { extensions: ['.jpg', '.png', '.jpeg'] })
+        console.log("killing the process...")
+        process.exit()
+    })
+})
+
