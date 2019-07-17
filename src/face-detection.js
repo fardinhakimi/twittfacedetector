@@ -4,6 +4,25 @@ const { extname, join} = require('path')
 const { unlinkSync } = require('fs')
 const config = require('./config.js')
 
+
+const saveProcessedImage = (processedImage, extension) => {
+
+    return new Promise((resolve, reject) => {
+
+        try {
+
+            const generatedFileName = shortid.generate()
+
+            cv.imwrite(join(config.processed_images_path, `${generatedFileName}.${extension}`), processedImage)
+
+            resolve(generatedFileName)
+
+        }catch(err){
+            reject(err)
+        }
+    })
+}
+
 const detectFaces = (imageName) => {
 
     return new Promise(async (resolve, reject) => {
@@ -53,25 +72,6 @@ const detectFaces = (imageName) => {
             reject(err)
         }
 
-    })
-}
-
-
-const saveProcessedImage = (processedImage, extension) => {
-
-    return new Promise((resolve, reject) => {
-
-        try {
-
-            const generatedFileName = shortid.generate()
-
-            cv.imwrite(join(config.processed_images_path, `${generatedFileName}.${extension}`), processedImage)
-
-            resolve(generatedFileName)
-
-        }catch(err){
-            reject(err)
-        }
     })
 }
 
