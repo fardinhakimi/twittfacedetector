@@ -1,7 +1,7 @@
 {
-    "name": "fashionface",
+    "name": "twittfacedetector",
     "version": "1.0.0",
-    "description": "a marketing campaign impact tracker ",
+    "description": "A marketing campaign impact tracker",
     "engines": {
         "node": "v8.9.1",
         "npm": "5.5.1"
@@ -15,7 +15,6 @@
     "license": "ISC",
     "dependencies": {
         "express": "^4.16.2",
-        "file-extension": "^3.1.2",
         "find-remove": "^1.0.1",
         "image-downloader": "^3.3.0",
         "moving-average": "^1.0.0",

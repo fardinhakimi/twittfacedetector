@@ -1,45 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>marketing campaing impact tracker</title>
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="/main.css">
-  </head>
 
-  <body>
-    <div class="container wrapper">
-      <div class="col-md-12">
-        <div class="col-md-3 stats-sidebar">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>marketing campaing impact tracker</title>
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/main.css">
+</head>
 
-          <div class="filter-titles"><h3>Filter and stats</h3></div>
+<body>
+  <div class="container wrapper">
+    <div class="col-md-12">
+      <div class="col-md-3 stats-sidebar">
 
-          <div class="tweet-tracker-container">
-            <label>Track by: </label><input id="track-term" type="text">
-          </div>
+        <div class="filter-titles">
+          <h3>Filter and stats</h3>
+        </div>
 
-          <div class="tweet-stats">
-            <p><b>stats:</b></p>
-            <p>Tweets per hour:</p>
-            <p>male faces per hour:</p>
-            <p>female faces per hour:</p>
+        <div class="tweet-tracker-container">
+          <label>Track by: </label><input id="track-term" type="text">
+        </div>
+
+        <div class="tweet-stats">
+          <p><b>Stats:</b></p>
+          <p>Tweets per hour:</p>
+          <p>male faces per hour:</p>
+          <p>female faces per hour:</p>
+        </div>
+
+      </div>
+
+      <div class="col-md-9 latest-tweet-pics no-padding">
+        <div class="filter-titles">
+          <h3>10 latest processed images</h3>
+        </div>
+        <div class="latest-tweets-inner">
+          <ul id="tweet-list"></ul>
+          <div>
           </div>
 
         </div>
-
-      <div class="col-md-9 latest-tweet-pics no-padding">
-        <div class="filter-titles"><h3>10 latest processed images</h3></div>
-        <div class="latest-tweets-inner">
-        <ul id="tweet-list"></ul>
-        <div>
       </div>
-
-    </div>
-    </div>
     </div>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -47,6 +52,7 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
-    <script src="/client-js.js"></script>
-  </body>
+    <script src="/app.js"></script>
+</body>
+
 </html>

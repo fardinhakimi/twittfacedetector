@@ -1,15 +1,16 @@
-(function(){// iffe start
-
-
+(function(){
+  
   var socket = io.connect("http://localhost:3000");
   var trackTerm = $("#track-term");
   var tweetList = $("#tweet-list");
+
   // listen to  message event from server
   socket.on("tweet", (data)=>{
     appendProcessedImage(data);
   });
 
   function appendProcessedImage(data){
+
     var pics = data.tweet.entities.media;
 
     if(pics!= undefined){
@@ -49,4 +50,4 @@
       socket.emit("updateTracker",{"trackerTerm":$(this).val()});
   });
 
-})(); // iffe end
+})();
