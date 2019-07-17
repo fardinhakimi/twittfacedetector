@@ -4,7 +4,7 @@ require('dotenv').config()
 const express = require('express')
 const twitter = require('node-tweet-stream')
 const faceDetection = require('./face-detection.js')
-const MA = require('moving-average')
+const movingAverage = require('moving-average')
 const imageDownloader = require('image-downloader')
 const { unlinkSync} = require('fs')
 const findRemoveSync = require('find-remove')
@@ -29,8 +29,12 @@ var trackerTerm = "fashionFace"
 
 global.tweetCounter = 0
 let timeInterval = 3600 * 1000
-const ma = MA(timeInterval)
+const ma = movingAverage(timeInterval)
 
+const resetTweetParams = () => {
+    global.tweetCounter = 0
+    client.untrack(trackerTerm)
+}
 
 io.on("connection", (socket) => {
 
@@ -49,28 +53,6 @@ io.on("connection", (socket) => {
     });
 })
 
-client.on('tweet', (tweet) => {
-
-    global.tweetCounter += 1
-
-    /* calculate moving average TODO
-    setInterval(() => {
-        ma.push(Date.now(), tweetCounter)
-    })
-    */
-
-    let media = tweet.entities.media
-
-    if (media !== undefined && media.length > 0) {
-        sendProcessImage(media)
-    }
-})
-
-
-const resetTweetParams = () => {
-    global.tweetCounter = 0
-    client.untrack(trackerTerm)
-}
 
 const sendProcessImage =  async (images) => {
 
@@ -101,6 +83,25 @@ const sendProcessImage =  async (images) => {
         }
     })
 }
+
+client.on('tweet', (tweet) => {
+
+    global.tweetCounter += 1
+
+    /* calculate moving average TODO
+    setInterval(() => {
+        ma.push(Date.now(), tweetCounter)
+    })
+    */
+
+    let media = tweet.entities.media
+
+    if (media !== undefined && media.length > 0) {
+        sendProcessImage(media)
+    }
+})
+
+
 
 // RUN PROGRAM AND LOG ERRORS
 

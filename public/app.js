@@ -7,14 +7,17 @@
   var trackTerm = $("#track-term");
   var tweetList = $("#tweet-list");
 
-  socket.on("tweet", (data) => {
-    appendProcessedImage(data);
-  });
+  function appendImage(tweetRow) {
+    tweetList.append(tweetRow);
+  }
 
-  trackTerm.on("change", function (e) {
-    tweetList.html("");
-    socket.emit("updateTracker", { "trackerTerm": $(this).val() });
-  });
+  function deleteProcessedImage() {
+    var removAble = document.getElementById("tweet-list").firstChild;
+    var removAbleImgId = "img_" + removAble.getAttribute("id");
+    document.getElementById("tweet-list").removeChild(removAble);
+    var removableSrc = document.getElementById(removAbleImgId).getAttribute('src');
+    socket.emit("deleteProcessedPicture", { "src": removableSrc });
+  }
 
   function appendProcessedImage(data) {
 
@@ -36,16 +39,14 @@
     }
   }
 
-  function appendImage(tweetRow) {
-    tweetList.append(tweetRow);
-  }
+  socket.on("tweet", (data) => {
+    appendProcessedImage(data);
+  });
 
-  function deleteProcessedImage() {
-    var removAble = document.getElementById("tweet-list").firstChild;
-    var removAbleImgId = "img_" + removAble.getAttribute("id");
-    document.getElementById("tweet-list").removeChild(removAble);
-    var removableSrc = document.getElementById(removAbleImgId).getAttribute('src');
-    socket.emit("deleteProcessedPicture", { "src": removableSrc });
-  }
+  trackTerm.on("change", function (e) {
+    tweetList.html("");
+    socket.emit("updateTracker", { "trackerTerm": $(this).val() });
+  });
+
 
 })();
