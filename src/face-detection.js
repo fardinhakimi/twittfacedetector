@@ -1,12 +1,12 @@
 const cv = require('opencv4nodejs')
 const shortid = require('shortid')
-const { extname, join } = require('path')
+const { extname, join} = require('path')
 const { unlinkSync } = require('fs')
 const config = require('./config.js')
 
 const detectFaces = (imageName) => {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
 
         try {
 
@@ -16,15 +16,15 @@ const detectFaces = (imageName) => {
             const classifier = new cv.CascadeClassifier(cv.HAAR_FRONTALFACE_ALT2)
             // detect faces
             const { objects, numDetections } = classifier.detectMultiScale(image.bgrToGray())
-
-            if (!objects.length) {
+            
+            if ( objects === []) {
 
                 unlinkSync(imageName)
 
                 reject('no faces found')
             }
 
-            // draw detection
+            // Draw detection
             const numDetectionsTh = 10
 
             objects.forEach((rect, i) => {
@@ -41,24 +41,37 @@ const detectFaces = (imageName) => {
                 )
             })
 
-            const generatedFileName = shortid.generate()
-            const fileName = join(config.images_path, `${generatedFileName}.${extension}`)
-
-            cv.imwrite(fileName, image)
-
-            unlinkSync(imageName)
-
+            generatedFileName = await saveProcessedImage(image, extension);
+        
             resolve({
                 "facesFound": objects.length,
-                "fileUrl": join("processed_images", `${generatedFileName}.${extension}`),
-                "fileName": generatedFileName
+                "processedFileUrl": join('processed_images', `${generatedFileName}.${extension}`),
+                "generatedFileName": generatedFileName
             })
-
 
         } catch (err) {
             reject(err)
         }
 
+    })
+}
+
+
+const saveProcessedImage = (processedImage, extension) => {
+
+    return new Promise((resolve, reject) => {
+
+        try {
+
+            const generatedFileName = shortid.generate()
+
+            cv.imwrite(join(config.processed_images_path, `${generatedFileName}.${extension}`), processedImage)
+
+            resolve(generatedFileName)
+
+        }catch(err){
+            reject(err)
+        }
     })
 }
 

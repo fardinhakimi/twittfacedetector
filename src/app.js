@@ -1,15 +1,15 @@
-const socket = require('socket.io')
+
+require('dotenv').config()
+
 const express = require('express')
 const twitter = require('node-tweet-stream')
 const faceDetection = require('./face-detection.js')
 const MA = require('moving-average')
 const imageDownloader = require('image-downloader')
-const { unlink } = require('fs')
+const { unlinkSync} = require('fs')
 const findRemoveSync = require('find-remove')
-const path = require('path')
-require('dotenv').config()
 const config = require('./config.js')
-
+const { basename , join} = require('path')
 const app = express()
 const client = new twitter(config.twitterConfig)
 
@@ -19,16 +19,14 @@ const server = app.listen(port, () => {
     console.log(`Server is listening on port ${port}`)
 })
 
-
 app.use(express.static('public'))
 
-// Initialize socket.io
-const io = socket.listen(server)
+const io = require('socket.io')(server);
 
-// tracker term
 var trackerTerm = "fashionFace"
 
 // hourly
+
 global.tweetCounter = 0
 let timeInterval = 3600 * 1000
 const ma = MA(timeInterval)
@@ -43,34 +41,28 @@ io.on("connection", (socket) => {
     })
 
     socket.on("deleteProcessedPicture", (data) => {
-
-        unlink(path.join(__dirname, "public", data.src), (err) => {
-
-            if (err) {
-                throw err
-            }
-
-            console.log("deleted image" + data.src)
-        })
+        unlinkSync(join(config.processed_images_path,basename(data.src)))
     })
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
 })
 
 client.on('tweet', (tweet) => {
 
-    console.log(tweet); exit();
-
     global.tweetCounter += 1
 
-    // calculate moving average // TODO
+    /* calculate moving average TODO
     setInterval(() => {
         ma.push(Date.now(), tweetCounter)
     })
+    */
 
-    // get media/images array
     let media = tweet.entities.media
 
     if (media !== undefined && media.length > 0) {
-        sendProcessImage(media, tweet)
+        sendProcessImage(media)
     }
 })
 
@@ -80,10 +72,9 @@ const resetTweetParams = () => {
     client.untrack(trackerTerm)
 }
 
+const sendProcessImage =  async (images) => {
 
-const sendProcessImage =  async (media, tweet) => {
-
-    media.forEach(async (image) => {
+    images.forEach(async (image) => {
 
         const imageOptions = {
             url: image.media_url_https,
@@ -92,17 +83,18 @@ const sendProcessImage =  async (media, tweet) => {
 
         try {
 
-            const { fileName } = await imageDownloader.image(imageOptions)
+            const {filename} = await imageDownloader.image(imageOptions)
 
-            const data = await faceDetection.detectFaces(fileName)
+            const {processedFileUrl, generatedFileName } = await faceDetection.detectFaces(filename)
 
             io.emit('tweet', {
-                "tweet": tweet,
-                "fileUrl": data.fileUrl,
-                "fileName": data.fileName,
+                "fileUrl": processedFileUrl,
+                "fileName":  generatedFileName,
                 "trackerTerm": trackerTerm,
                 "tweetCounter": global.tweetCounter
             })
+
+            unlinkSync(filename)
 
         } catch (error) {
             console.log(error)
@@ -110,12 +102,12 @@ const sendProcessImage =  async (media, tweet) => {
     })
 }
 
-
 // RUN PROGRAM AND LOG ERRORS
 
 client.track(trackerTerm)
 
 client.on('error', (err) => {
+    console.log(" IO ERROR! ")
     console.log(err)
 })
 
@@ -130,4 +122,3 @@ process.on('SIGINT', () => {
         process.exit()
     })
 })
-

@@ -1,53 +1,51 @@
-(function(){
-  
-  var socket = io.connect("http://localhost:3000");
+(function () {
+
+  var socket = io();
+
+  socket.connect('http://localhost:3000')
+
   var trackTerm = $("#track-term");
   var tweetList = $("#tweet-list");
 
-  // listen to  message event from server
-  socket.on("tweet", (data)=>{
+  socket.on("tweet", (data) => {
     appendProcessedImage(data);
   });
 
-  function appendProcessedImage(data){
+  trackTerm.on("change", function (e) {
+    tweetList.html("");
+    socket.emit("updateTracker", { "trackerTerm": $(this).val() });
+  });
 
-    var pics = data.tweet.entities.media;
+  function appendProcessedImage(data) {
 
-    if(pics!= undefined){
+    if (data.fileUrl && data.fileName) {
 
-      for(var i=0; i<pics.length;i++){
+      var picsList = $("#tweet-list li");
+      var src = data.fileUrl;
+      var fileName = data.fileName;
+      var tweetImg = $("<img id='img_" + fileName + "' style='height:300px; width:100%;' src=" + src + ">");
+      var tweetRow = $("<li id=" + fileName + "></li>");
+      tweetRow.append(tweetImg);
 
-        var picsList =$("#tweet-list li");
-        var src = data.fileUrl;
-        var fileName = data.fileName;
-        var tweetImg = $("<img id='img_"+fileName+"' style='height:300px; width:100%;' src="+src+">");
-        var tweetRow = $("<li id="+fileName+"></li>");
-        tweetRow.append(tweetImg);
-        if (picsList.length<10){
-          tweetList.append(tweetRow);
-        }else{
-         // get removable child
-         var removAble = document.getElementById("tweet-list").firstChild;
-         // get img src
-         var removAbleImgId="img_"+removAble.getAttribute("id");
-         // get src
-         var removableSrc = document.getElementById(removAbleImgId).getAttribute('src');
-         // remove first item in the list
-         document.getElementById("tweet-list").removeChild(removAble);
-         // append latest incoming item
-         tweetList.append(tweetRow);
-         // delete picture
-         socket.emit("deleteProcessedPicture",{"src":removableSrc});
+      if (picsList.length < 10) {
+        appendImage(tweetRow);
+      } else {
+        appendImage(tweetRow);
+        deleteProcessedImage();
       }
     }
   }
-}
 
-  // update tracker term
-  trackTerm.on("change", function(e){
-    console.log($(this).val());
-     tweetList.html("");
-      socket.emit("updateTracker",{"trackerTerm":$(this).val()});
-  });
+  function appendImage(tweetRow) {
+    tweetList.append(tweetRow);
+  }
+
+  function deleteProcessedImage() {
+    var removAble = document.getElementById("tweet-list").firstChild;
+    var removAbleImgId = "img_" + removAble.getAttribute("id");
+    document.getElementById("tweet-list").removeChild(removAble);
+    var removableSrc = document.getElementById(removAbleImgId).getAttribute('src');
+    socket.emit("deleteProcessedPicture", { "src": removableSrc });
+  }
 
 })();
