@@ -9,55 +9,39 @@
   <title>marketing campaing impact tracker</title>
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="/main.css">
-
-
-  <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
-
 </head>
 
 <body>
-  <div class="container wrapper">
-    <div class="col-md-12 col-xs-12 col-lg-12">
-      <div class="col-md-3 col-xs-6 col-lg-3 stats-sidebar">
 
-        <div class="filter-titles">
-          <h3>Filter and stats</h3>
-        </div>
+  <div class="app" id="app">
 
-        <div class="tweet-tracker-container">
-          <label>Track by: </label><input id="track-term" type="text">
-        </div>
+    <div class="container wrapper col-md-12 col-xs-6 col-lg- 12 col-xs-12">
 
-        <div class="tweet-stats">
-          <p><b>Stats:</b></p>
-          <p>Tweets per hour:</p>
-          <p>male faces per hour:</p>
-          <p>female faces per hour:</p>
-        </div>
-
+      <div class="col-md-3 col-xs-6 col-lg-3 stats-sidebar pull-left">
+        <stats-side-bar />
       </div>
 
       <div class="col-md-9 col-lg-9 col-xs-6 latest-tweet-pics no-padding">
+
         <div class="filter-titles">
           <h3>10 latest processed images</h3>
         </div>
-        <div class="latest-tweets-inner">
-          <ul id="tweet-list"></ul>
-          <div>
-          </div>
 
+        <div class="latest-tweets-inner">
+          <ul id="tweet-list">
+            <tweet-item v-for="tweet in tweetList" v-bind:tweet="tweet">
+            </tweet-item>
+          </ul>
         </div>
+
       </div>
     </div>
+  </div>
 
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
-    <script src="/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script src="/app.js"></script>
 </body>
 
 </html>

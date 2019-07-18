@@ -30,6 +30,13 @@ background-color: #f9f9f9;
 height: 70px;
 }
 
+.tweet-image{
+
+height:300px;
+width:100%;
+
+}
+
 .tweet-tracker-container, .tweet-stats{
   padding: 10px;
 }

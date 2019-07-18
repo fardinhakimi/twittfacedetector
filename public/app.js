@@ -1,52 +1,90 @@
-(function () {
 
-  var socket = io();
+var socket = io()
 
-  socket.connect('http://localhost:3000')
+socket.connect('http://localhost:3000')
 
-  var trackTerm = $("#track-term");
-  var tweetList = $("#tweet-list");
+// tweet item
+var tweetItem = {
 
-  function appendImage(tweetRow) {
-    tweetList.append(tweetRow);
-  }
+    template: `<li v-bind:id= "tweet.fileName"><img class="tweet-image" v-bind:src= "tweet.fileUrl"></li>`,
+    props: ['tweet'],
+}
 
-  function deleteProcessedImage() {
-    var removAble = document.getElementById("tweet-list").firstChild;
-    var removAbleImgId = "img_" + removAble.getAttribute("id");
-    document.getElementById("tweet-list").removeChild(removAble);
-    var removableSrc = document.getElementById(removAbleImgId).getAttribute('src');
-    socket.emit("deleteProcessedPicture", { "src": removableSrc });
-  }
+var statsSideBar = {
 
-  function appendProcessedImage(data) {
+    data() {
+        return {
+            trackTerm: 'trump',
+        }
+    },
 
-    if (data.fileUrl && data.fileName) {
+    methods: {
 
-      var picsList = $("#tweet-list li");
-      var src = data.fileUrl;
-      var fileName = data.fileName;
-      var tweetImg = $("<img id='img_" + fileName + "' style='height:300px; width:100%;' src=" + src + ">");
-      var tweetRow = $("<li id=" + fileName + "></li>");
-      tweetRow.append(tweetImg);
+        updateTracker(event) {
+            socket.emit("updateTracker", { "trackerTerm": this.trackTerm })
+        }
+    },
 
-      if (picsList.length < 10) {
-        appendImage(tweetRow);
-      } else {
-        appendImage(tweetRow);
-        deleteProcessedImage();
-      }
+    created: function () {
+        this.updateTracker()
+    },
+
+    template: `
+                <div>
+                    <div class="filter-titles">
+                    <h3>Filter and stats</h3>
+                    </div>
+
+                    <div class="tweet-tracker-container">
+                    <label>Track by: </label>
+                    <input type="text" name="track-term" id="track-term" v-model="trackTerm" v-on:keyup.13="updateTracker($event)" />
+                    </div>
+
+                    <div class="tweet-stats">
+                    <p><b>Stats:</b></p>
+                    <p>Tweets per hour:</p>
+                    <p>male faces per hour:</p>
+                    <p>female faces per hour:</p>
+                    </div>
+                </dib>`
+}
+
+var tweetTracker = new Vue({
+
+    el: '#app',
+
+    components: {
+        'tweet-item': tweetItem,
+        'stats-side-bar': statsSideBar
+    },
+
+    data: {
+        tweetList: [],
+        maxTweetPerPage: 11
+    },
+
+    methods: {
+
+        appendTweet(tweet) {
+
+            if (tweet.fileUrl && tweet.fileUrl) {
+
+                this.tweetList.push(tweet)
+
+                if (this.tweetList.length >= this.maxTweetPerPage) {
+                    this.removeTweet()
+                }
+            }
+        },
+
+        removeTweet() {
+            removeAble = this.tweetList.shift()
+            socket.emit("deleteProcessedPicture", { "src": removeAble.fileUrl })
+        }
     }
-  }
+})
 
-  socket.on("tweet", (data) => {
-    appendProcessedImage(data);
-  });
+socket.on("tweet", (tweet) => {
 
-  trackTerm.on("change", function (e) {
-    tweetList.html("");
-    socket.emit("updateTracker", { "trackerTerm": $(this).val() });
-  });
-
-
-})();
+    tweetTracker.appendTweet(tweet)
+})
