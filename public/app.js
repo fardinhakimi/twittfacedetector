@@ -24,8 +24,8 @@ var statsSideBar = {
             socket.emit("updateTracker", { "trackerTerm": this.trackTerm })
         }
     },
-
-    created: function () {
+    
+    created() {
         this.updateTracker()
     },
 
@@ -78,7 +78,7 @@ var tweetTracker = new Vue({
         },
 
         removeTweet() {
-            removeAble = this.tweetList.shift()
+            var removeAble = this.tweetList.shift()
             socket.emit("deleteProcessedPicture", { "src": removeAble.fileUrl })
         }
     }
