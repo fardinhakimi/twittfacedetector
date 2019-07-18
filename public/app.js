@@ -46,7 +46,7 @@ var statsSideBar = {
                     <p>male faces per hour:</p>
                     <p>female faces per hour:</p>
                     </div>
-                </dib>`
+                </div>`
 }
 
 var tweetTracker = new Vue({
