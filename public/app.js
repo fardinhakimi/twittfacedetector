@@ -67,7 +67,7 @@ var tweetTracker = new Vue({
 
         appendTweet(tweet) {
 
-            if (tweet.fileUrl && tweet.fileUrl) {
+            if (tweet.fileName && tweet.fileUrl) {
 
                 this.tweetList.push(tweet)
 
